@@ -73,6 +73,7 @@ const CountrySelector = memo(({ isOpen, onClose, onSelect, currentCountry }: Cou
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [page, setPage] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const ITEMS_PER_PAGE = 50;
 
   useEffect(() => {
@@ -107,6 +108,12 @@ const CountrySelector = memo(({ isOpen, onClose, onSelect, currentCountry }: Cou
     }
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [page]);
 
   if (!isOpen) return null;
 
@@ -154,7 +161,7 @@ const CountrySelector = memo(({ isOpen, onClose, onSelect, currentCountry }: Cou
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-safe">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 pb-2">
           <div className="space-y-2">
             {paginatedCountries.map((country) => (
               <button
@@ -187,29 +194,31 @@ const CountrySelector = memo(({ isOpen, onClose, onSelect, currentCountry }: Cou
               </button>
             ))}
           </div>
+        </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 py-6">
+        {totalPages > 1 && (
+          <div className="shrink-0 px-4 py-4 pb-safe bg-gradient-to-t from-black/40 to-transparent backdrop-blur-sm border-t border-white/10">
+            <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => { haptic(20); setPage(p => Math.max(0, p - 1)); }}
                 disabled={page === 0}
-                className="px-4 py-2 bg-black/30 border border-white/20 rounded-[12px] text-white text-[14px] font-medium disabled:opacity-30 active:scale-95 transition-all touch-manipulation"
+                className="px-6 py-3 bg-black/30 border border-white/20 rounded-[14px] text-white text-[15px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all touch-manipulation shadow-lg"
               >
                 上一页
               </button>
-              <span className="text-white/60 text-[14px]">
+              <span className="text-white/80 text-[15px] font-medium min-w-[60px] text-center">
                 {page + 1} / {totalPages}
               </span>
               <button
                 onClick={() => { haptic(20); setPage(p => Math.min(totalPages - 1, p + 1)); }}
                 disabled={page >= totalPages - 1}
-                className="px-4 py-2 bg-black/30 border border-white/20 rounded-[12px] text-white text-[14px] font-medium disabled:opacity-30 active:scale-95 transition-all touch-manipulation"
+                className="px-6 py-3 bg-black/30 border border-white/20 rounded-[14px] text-white text-[15px] font-semibold disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-all touch-manipulation shadow-lg"
               >
                 下一页
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
